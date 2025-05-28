@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Summary Manager</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 15px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .section:last-child { border-bottom: none; margin-bottom: 0; }
+        .current-video-info, .video-item { padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; background-color: #f9f9f9; }
+        .video-item h3 { margin-top: 0; font-size: 1.1em; }
+        .video-item p { margin: 5px 0; font-size: 0.9em; }
+        .video-item .meta { font-size: 0.8em; color: #666; }
+        .actions button, input[type="search"], input[type="text"] {
+            padding: 8px 12px; margin-right: 5px; border: 1px solid #ccc; border-radius: 4px;
+            font-size: 0.9em;
+        }
+        button { cursor: pointer; background-color: #007bff; color: white; border-color: #007bff; }
+        button:hover { background-color: #0056b3; }
+        button.delete { background-color: #dc3545; border-color: #dc3545; }
+        button.delete:hover { background-color: #c82333; }
+        .search-bar { margin-bottom: 15px; }
+        .search-bar input { width: calc(100% - 100px); } /* Adjust width as needed */
+        .status { margin-top: 10px; padding: 10px; background-color: #e9ecef; border-radius: 4px; font-size: 0.9em; }
+        .hidden { display: none; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Summary Manager</h1>
+
+        <div class="section current-video-section">
+            <h2>Current Video</h2>
+            <div id="currentVideoInfo" class="current-video-info">Loading...</div>
+            <div class="actions">
+                <button id="saveCurrentVideoButton" class="hidden">Save Current Video Info</button>
+            </div>
+        </div>
+
+        <div class="section saved-videos-section">
+            <h2>Saved Videos</h2>
+            <div class="search-bar">
+                <input type="search" id="searchInput" placeholder="Search saved videos by title, channel...">
+                <button id="searchButton">Search</button>
+                <button id="clearSearchButton">Clear</button>
+            </div>
+            <div id="savedVideosList">
+                <p>No videos saved yet, or loading...</p>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="status hidden"></div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

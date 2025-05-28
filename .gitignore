@@ -1,0 +1,21 @@
+# Chrome Extension specific
+*.pem
+*.crx
+*.zip
+
+# Node modules (if you use npm)
+node_modules/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/ 
