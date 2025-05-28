@@ -1,10 +1,10 @@
 # YouTube Summary Manager
 
 ## First pass:
-Create a chrome extension that scrapes what ever youtube you are looking at inside Chrome and save
-this information to a json file for later processing.
-For example, downloading the youtube video and transcribing it for later use in an *GPT like LLM.
-//---------------------------------------------------------------------------------------------------
+Create a chrome extension that scrapes what ever youtube you are looking at inside Chrome and save<br>
+this information to a json file for later processing.<br>
+For example, downloading the youtube video and transcribing it for later use in an *GPT like LLM.<br>
+//---------------------------------------------------------------------------------------------------<br>
 A Chrome extension that helps you save and manage YouTube video information. The extension allows you to:
 - Save video information including title, channel details, and metadata for later processing
 - Organize saved videos by channel
