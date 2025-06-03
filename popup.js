@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
               currentVideoData = response.data;
               currentVideoInfoDiv.innerHTML = `
                   <h3>${currentVideoData.videoTitle}</h3>
-                  <p><strong>Channel:</strong> ${currentVideoData.channelName || 'N/A'} (ID: ${currentVideoData.channelId || 'N/A'})</p>
+                  <p><strong>Channel ID:</strong> ${currentVideoData.channelId || 'N/A'}</p>
+                  <p><strong>Channel URL:</strong> <a href="${currentVideoData.channelUrl}" target="_blank">${currentVideoData.channelUrl}</a></p>
                   <p><strong>Video ID:</strong> ${currentVideoData.videoId}</p>
                   <p><a href="${currentVideoData.videoUrl}" target="_blank">Open Video</a></p>
               `;
@@ -83,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const lowerTerm = term.toLowerCase();
       return videos.filter(video => 
           (video.videoTitle && video.videoTitle.toLowerCase().includes(lowerTerm)) ||
-          (video.channelName && video.channelName.toLowerCase().includes(lowerTerm)) ||
+          (video.channelId && video.channelId.toLowerCase().includes(lowerTerm)) ||
           (video.videoId && video.videoId.toLowerCase().includes(lowerTerm))
       );
   }
@@ -96,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
       savedVideosListDiv.innerHTML = videos.map(video => `
           <div class="video-item" data-video-id="${video.videoId}">
               <h3>${video.videoTitle}</h3>
-              <p><strong>Channel:</strong> ${video.channelName || 'N/A'} (ID: ${video.channelId || 'N/A'})</p>
+              <p><strong>Channel ID:</strong> ${video.channelId || 'N/A'}</p>
+              <p><strong>Channel URL:</strong> <a href="${video.channelUrl}" target="_blank">${video.channelUrl}</a></p>
               <p><strong>Video ID:</strong> ${video.videoId}</p>
               <p class="meta">Saved: ${new Date(video.savedTimestamp).toLocaleString()}</p>
               <p class="meta">File Path (in Downloads): ${video.filename || 'N/A'}</p>

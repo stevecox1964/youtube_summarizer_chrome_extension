@@ -17,26 +17,43 @@ setInterval(() => {
 
 // --- YouTube Info Scraper Function (to be injected) ---
 function scrapeYouTubePageInfo() {
+  console.log('Starting YouTube page info scraping...');
+  
   const videoId = new URLSearchParams(window.location.search).get('v');
+  console.log('Extracted videoId:', videoId);
+  
   let videoTitle = document.title.replace(/ - YouTube$/, "").trim();
+  console.log('Initial videoTitle from document.title:', videoTitle);
 
   const metaTitleTag = document.querySelector('meta[name="title"]');
+  console.log('Meta title tag found:', metaTitleTag?.content);
+  
   if (metaTitleTag && metaTitleTag.content && (videoTitle === "YouTube" || videoTitle === "")) {
     videoTitle = metaTitleTag.content;
+    console.log('Updated videoTitle from meta tag:', videoTitle);
   } else {
-      const h1Title = document.querySelector('#title h1.ytd-watch-metadata yt-formatted-string, h1.title.ytd-video-primary-info-renderer');
-      if (h1Title && h1Title.textContent && (videoTitle === "YouTube" || videoTitle === "" || videoTitle.length < 5)) {
-        videoTitle = h1Title.textContent.trim();
-      }
+    const h1Title = document.querySelector('#title h1.ytd-watch-metadata yt-formatted-string, h1.title.ytd-video-primary-info-renderer');
+    console.log('H1 title element found:', h1Title?.textContent);
+    
+    if (h1Title && h1Title.textContent && (videoTitle === "YouTube" || videoTitle === "" || videoTitle.length < 5)) {
+      videoTitle = h1Title.textContent.trim();
+      console.log('Updated videoTitle from H1:', videoTitle);
+    }
   }
 
   let channelId = null;
   let channelName = null;
   let channelUrl = null;
+  let channelHandle = null;
+  let channelIdSource = 'none';
 
   const channelMetaTag = document.querySelector('meta[itemprop="channelId"]');
+  console.log('Channel meta tag found:', channelMetaTag?.content);
+  
   if (channelMetaTag && channelMetaTag.content) {
     channelId = channelMetaTag.content;
+    channelIdSource = 'meta';
+    console.log('Channel ID from meta tag:', channelId);
   }
 
   const ownerElement = document.querySelector(
@@ -45,49 +62,124 @@ function scrapeYouTubePageInfo() {
     '#upload-info #channel-name a.yt-simple-endpoint, '+
     'ytd-channel-name .yt-simple-endpoint'
   );
+  console.log('Owner element found:', ownerElement?.textContent, 'URL:', ownerElement?.href);
 
   if (ownerElement) {
     channelName = ownerElement.textContent.trim();
     channelUrl = ownerElement.href;
+    console.log('Channel info from owner element:', { channelName, channelUrl });
+    
     if (channelUrl && !channelId) {
-        const pathSegments = new URL(channelUrl).pathname.split('/');
-        const lastSegment = pathSegments.pop() || pathSegments.pop();
-        if (lastSegment && (lastSegment.startsWith('UC') || lastSegment.startsWith('@'))) {
-            channelId = lastSegment;
-        }
+      const pathSegments = new URL(channelUrl).pathname.split('/');
+      const lastSegment = pathSegments.pop() || pathSegments.pop();
+      console.log('Path segments from channel URL:', pathSegments, 'Last segment:', lastSegment);
+      
+      if (lastSegment && lastSegment.startsWith('UC')) {
+        channelId = lastSegment;
+        channelIdSource = 'url_UC';
+        console.log('Channel ID extracted from URL (UC...):', channelId);
+      } else if (lastSegment && lastSegment.startsWith('@')) {
+        channelHandle = lastSegment;
+        channelIdSource = 'url_handle';
+        console.log('Channel handle extracted from URL:', channelHandle);
+      }
     }
   }
 
   if (!channelName) {
     const authorMetaTag = document.querySelector('meta[itemprop="author"]');
+    console.log('Author meta tag found:', authorMetaTag?.content);
+    
     if (authorMetaTag && authorMetaTag.content) {
       channelName = authorMetaTag.content;
+      console.log('Channel name from author meta tag:', channelName);
     }
   }
   
   if (!channelId) {
     try {
-        const ytInitialData = window.ytInitialData || JSON.parse(Array.from(document.scripts).find(s => s.textContent.includes("ytInitialData ="))?.textContent?.match(/ytInitialData\s*=\s*(\{.+?\});/)?.[1]);
-        if (ytInitialData) {
-            const idFromData = ytInitialData?.contents?.twoColumnWatchNextResults?.results?.results?.contents
-                ?.find(c => c.videoSecondaryInfoRenderer)?.videoSecondaryInfoRenderer
-                ?.owner?.videoOwnerRenderer?.navigationEndpoint?.browseEndpoint?.browseId;
-            if (idFromData && idFromData.startsWith('UC')) {
-                channelId = idFromData;
-            }
+      console.log('Attempting to extract channel ID from ytInitialData...');
+      const ytInitialData = window.ytInitialData || JSON.parse(Array.from(document.scripts).find(s => s.textContent.includes("ytInitialData ="))?.textContent?.match(/ytInitialData\s*=\s*(\{.+?\});/)?.[1]);
+      
+      if (ytInitialData) {
+        console.log('ytInitialData found, searching for channel ID...');
+        const idFromData = ytInitialData?.contents?.twoColumnWatchNextResults?.results?.results?.contents
+          ?.find(c => c.videoSecondaryInfoRenderer)?.videoSecondaryInfoRenderer
+          ?.owner?.videoOwnerRenderer?.navigationEndpoint?.browseEndpoint?.browseId;
+        
+        console.log('Channel ID from ytInitialData:', idFromData);
+        
+        if (idFromData && idFromData.startsWith('UC')) {
+          channelId = idFromData;
+          channelIdSource = 'ytInitialData';
+          console.log('Channel ID set from ytInitialData:', channelId);
         }
-    } catch(e) { console.warn("Error parsing ytInitialData for channelId", e); }
+      }
+    } catch(e) { 
+      console.warn("Error parsing ytInitialData for channelId:", e); 
+    }
   }
 
-  return {
+  // If we only have a handle, try to fetch the channel page and extract the UC... ID, canonical URL, and channel name
+  if ((!channelId || channelIdSource === 'handle_only' || channelIdSource === 'url_handle') && channelHandle) {
+    try {
+      console.log('Attempting to fetch channel page to extract UC... channel ID, canonical URL, and channel name from handle:', channelHandle);
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', `https://www.youtube.com/${channelHandle}`, false); // synchronous request
+      xhr.send(null);
+      if (xhr.status === 200) {
+        const html = xhr.responseText;
+        const idMatch = html.match(/"channelId":"(UC[^"]+)"/);
+        if (idMatch && idMatch[1]) {
+          channelId = idMatch[1];
+          channelIdSource = 'fetched_from_handle';
+          console.log('Fetched UC... channel ID from channel page:', channelId);
+        } else {
+          console.warn('Could not find UC... channel ID in fetched channel page.');
+        }
+        // Extract canonical URL
+        const canonicalMatch = html.match(/<link rel="canonical" href="([^"]+)"/);
+        if (canonicalMatch && canonicalMatch[1]) {
+          channelUrl = canonicalMatch[1];
+          console.log('Fetched canonical channel URL from channel page:', channelUrl);
+        } else {
+          console.warn('Could not find canonical channel URL in fetched channel page.');
+        }
+        // Extract channel name
+        const nameMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+        if (nameMatch && nameMatch[1]) {
+          channelName = nameMatch[1];
+          console.log('Fetched channel name from channel page:', channelName);
+        } else {
+          console.warn('Could not find channel name in fetched channel page.');
+        }
+      } else {
+        console.warn('Failed to fetch channel page for handle:', channelHandle, 'Status:', xhr.status);
+      }
+    } catch (e) {
+      console.warn('Error fetching channel page for handle:', channelHandle, e);
+    }
+  }
+
+  if (!channelId && channelHandle) {
+    console.warn('WARNING: Only found channel handle, not UC... channel ID. Some features may not work as expected.');
+    channelId = channelHandle;
+    channelIdSource = 'handle_only';
+  }
+
+  const result = {
     scrapedAt: new Date().toISOString(),
     videoId: videoId || null,
     videoTitle: videoTitle || "N/A",
     channelId: channelId || "N/A_ChannelID_Unavailable",
     channelName: channelName || "N/A",
     channelUrl: channelUrl || "N/A",
-    videoUrl: window.location.href
+    videoUrl: window.location.href,
+    channelIdSource: channelIdSource
   };
+  
+  console.log('Final scraped data:', result);
+  return result;
 }
 // --- End of Scraper Function ---
 
