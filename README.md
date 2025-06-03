@@ -19,10 +19,10 @@ A Chrome extension that helps you save and manage YouTube video information. The
 - Easy video management interface
 
 ## Installation
-1. Clone this repository
-2. Open Chrome and navigate to `chrome://extensions/`
+1. Clone this repository into your Windows "Documents" folder, or where ever.
+2. Open Chrome and navigate to `chrome://extensions/` or click the extensions icon
 3. Enable "Developer mode" in the top right
-4. Click "Load unpacked" and select the extension directory
+4. Click "Load unpacked" and select the extension directory where you saved the code
 
 ## Usage
 1. Navigate to any YouTube video
