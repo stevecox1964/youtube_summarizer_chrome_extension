@@ -4,6 +4,11 @@
 Create a chrome extension that scrapes what ever youtube you are looking at inside Chrome and save<br>
 this information to a json file for later processing.<br>
 For example, downloading the youtube video and transcribing it for later use in an *GPT like LLM.<br>
+
+Link to Google AI Studio prompt - ## NOTE The code has changed from this original prompt:<br>
+https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221fsuGbFZXGPesEZTSYZ_Kcdmeltbap6iZ%22%5D,%22action%22:%22open%22,%22userId%22:%22113192104645550761642%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing
+<br>
+
 //---------------------------------------------------------------------------------------------------<br>
 A Chrome extension that helps you save and manage YouTube video information. The extension allows you to:
 - Save video information including title, channel details, and metadata for later processing
